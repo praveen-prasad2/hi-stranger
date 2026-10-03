@@ -1,0 +1,323 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Tokens
+   The four "live" colours (--bg, --ink, --ink-soft, --accent) are
+   tweened by GSAP as you move between scenes (see lib/tones.ts).
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bg: #0b0a09;
+  --ink: #ece5d9;
+  --ink-soft: #9d958a;
+  --accent: #b8a07a;
+  --paper-o: 0;
+  --leak-o: 0;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@theme inline {
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-hand: var(--font-caveat), "Caveat", "Segoe Print", cursive;
+
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+
+  /* fixed palette for overlays that don't follow the scroll tone */
+  --color-night: #0b0a09;
+  --color-paper: #f4efe6;
+  --color-ivory: #f7f3eb;
+  --color-sheet: #fbf8f2;
+  --color-charcoal: #191816;
+  --color-graphite: #5f5850;
+  --color-cream: #ece5d9;
+  --color-gold: #a48d68;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  min-height: 100svh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 1.5px dashed var(--accent);
+  outline-offset: 5px;
+  border-radius: 2px;
+}
+
+@layer base {
+  button {
+    cursor: pointer;
+  }
+}
+
+html.is-locked,
+html.is-locked body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* custom cursor (desktop only — enabled from JS) */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+/* ── Type scale (layered, so utilities like text-ink-soft can override) ── */
+@layer components {
+.t-display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 10.5vw, 7rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+.t-large {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2.05rem, 7.6vw, 4.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+.t-body {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.4rem, 5.4vw, 2.35rem);
+  line-height: 1.28;
+}
+.t-quiet {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.2rem, 4.6vw, 1.75rem);
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.t-small {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.t-hand {
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 5.6vw, 2.1rem);
+  line-height: 1.1;
+  color: var(--ink-soft);
+}
+
+.balance {
+  text-wrap: balance;
+}
+}
+
+/* ── Masked line reveals ────────────────────────────────────── */
+.mask-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.mask-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* ── Typing cursor ──────────────────────────────────────────── */
+.type-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 0.08em;
+  vertical-align: -0.08em;
+  background: var(--accent);
+  animation: blink 1.05s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── Atmosphere layers ──────────────────────────────────────── */
+.atmo-paper {
+  opacity: var(--paper-o);
+  background-image: url("/textures/paper.svg");
+  background-size: 420px 420px;
+  mix-blend-mode: multiply;
+}
+.atmo-vignette {
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(60 44 24 / 0.1) 100%);
+  opacity: var(--paper-o);
+}
+.atmo-leak {
+  opacity: var(--leak-o);
+  background:
+    radial-gradient(40% 32% at 88% 6%, rgb(232 196 140 / 0.32), transparent 70%),
+    radial-gradient(36% 30% at 4% 96%, rgb(214 170 120 / 0.2), transparent 70%);
+}
+.atmo-grain {
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("/textures/grain.svg");
+  background-size: 180px 180px;
+  opacity: 0.07;
+}
+.atmo-grain.is-animated {
+  animation: grain 0.9s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  17% { transform: translate(-4%, 3%); }
+  33% { transform: translate(3%, -5%); }
+  50% { transform: translate(-6%, -2%); }
+  67% { transform: translate(5%, 4%); }
+  83% { transform: translate(-2%, 6%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* a slow drift for the floating first message (uses `translate`, so it never fights GSAP transforms) */
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+
+/* ── Paper surfaces ─────────────────────────────────────────── */
+.paper-sheet {
+  background-color: #fbf8f2;
+  background-image:
+    url("/textures/paper.svg"),
+    linear-gradient(175deg, #fdfbf6 0%, #f6f0e4 100%);
+  background-size: 420px 420px, 100% 100%;
+  background-blend-mode: multiply, normal;
+  color: #191816;
+}
+.paper-ruled {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--rule, 1.6em) - 1px),
+      rgb(140 120 90 / 0.16) calc(var(--rule, 1.6em) - 1px),
+      rgb(140 120 90 / 0.16) var(--rule, 1.6em)
+    ),
+    url("/textures/paper.svg"),
+    linear-gradient(175deg, #fdfbf6 0%, #f5eee1 100%);
+  background-size: 100% 100%, 420px 420px, 100% 100%;
+}
+
+/* ── Envelope ───────────────────────────────────────────────── */
+.envelope {
+  --env-back: #d7c8ae;
+  --env-side: #e6d9c2;
+  --env-bottom: #ebdfca;
+  --env-flap: #e2d4bb;
+  perspective: 1400px;
+}
+.envelope[data-variant="ivory"] {
+  --env-back: #ddd3c2;
+  --env-side: #efe8db;
+  --env-bottom: #f3ede2;
+  --env-flap: #ebe3d4;
+}
+.env-back {
+  background: var(--env-back);
+  box-shadow:
+    0 30px 60px -28px rgb(40 28 12 / 0.45),
+    0 10px 20px -12px rgb(40 28 12 / 0.25);
+  border-radius: 4px;
+}
+.env-pocket {
+  filter: drop-shadow(0 -1px 1.5px rgb(60 40 20 / 0.16));
+  pointer-events: none;
+}
+.env-pocket > .env-left,
+.env-pocket > .env-right,
+.env-pocket > .env-bottom {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+}
+.env-left {
+  background: linear-gradient(90deg, var(--env-side), color-mix(in srgb, var(--env-side) 92%, #8a6f48));
+  clip-path: polygon(0 0, 54% 54%, 0 100%);
+}
+.env-right {
+  background: linear-gradient(270deg, var(--env-side), color-mix(in srgb, var(--env-side) 92%, #8a6f48));
+  clip-path: polygon(100% 0, 46% 54%, 100% 100%);
+}
+.env-bottom {
+  background: linear-gradient(0deg, var(--env-bottom), color-mix(in srgb, var(--env-bottom) 94%, #8a6f48));
+  clip-path: polygon(0 100%, 50% 44%, 100% 100%);
+}
+.env-flap {
+  transform-origin: 50% 0%;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 2px 2px rgb(60 40 20 / 0.18));
+}
+.env-flap-shape {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--env-flap) 94%, #8a6f48), var(--env-flap));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-radius: 4px 4px 0 0;
+}
+
+/* ── Sibling card flip ──────────────────────────────────────── */
+.flip {
+  perspective: 1000px;
+}
+.flip-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.flip[aria-pressed="true"] .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .atmo-grain.is-animated {
+    animation: none;
+  }
+  .type-cursor {
+    animation: none;
+  }
+  .flip-inner {
+    transition-duration: 0.01s;
+  }
+}
